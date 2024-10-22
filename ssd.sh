@@ -24,6 +24,8 @@ while [ $(($(date +%s) - $start_time)) -lt 60 ]; do
   dd if=/dev/zero of=${OUTPUT_FILE}_1 bs=1G count=1 oflag=sync status=none &
   dd if=/dev/zero of=${OUTPUT_FILE}_2 bs=1G count=1 oflag=sync status=none &
   dd if=/dev/zero of=${OUTPUT_FILE}_3 bs=1G count=1 oflag=sync status=none &
+  dd if=/dev/zero of=${OUTPUT_FILE}_4 bs=1G count=1 oflag=sync status=none &
+  dd if=/dev/zero of=${OUTPUT_FILE}_5 bs=1G count=1 oflag=sync status=none &
 
   # Wait for both operations to complete
   wait
