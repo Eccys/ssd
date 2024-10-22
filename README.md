@@ -7,3 +7,5 @@ Run via [cron](https://en.wikipedia.org/wiki/Cron):
 ```
 * * * * * /bin/bash <ssd.sh>
 ```
+
+Tested on MacOS.
