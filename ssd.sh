@@ -15,6 +15,10 @@ fi
 start_time=$(date +%s)
 
 while [ $(($(date +%s) - $start_time)) -lt 59 ]; do
+    dd if=/dev/zero of=${OUTPUT_FILE}_1 bs=1G count=1 oflag=sync status=none
+    dd if=/dev/zero of=${OUTPUT_FILE}_2 bs=1G count=1 oflag=sync status=none
+    dd if=/dev/zero of=${OUTPUT_FILE}_3 bs=1G count=1 oflag=sync status=none
+    dd if=/dev/zero of=${OUTPUT_FILE}_4 bs=1G count=1 oflag=sync status=none
     dd if=/dev/zero of=${OUTPUT_FILE}_5 bs=1G count=1 oflag=sync status=none
   wait
 done
