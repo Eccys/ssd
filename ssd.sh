@@ -20,7 +20,7 @@ fi
 start_time=$(date +%s)
 
 while [ $(($(date +%s) - $start_time)) -lt 59 ]; do
-  for i in {1..10}; do
+  for i in {1..5}; do
     dd if=/dev/zero of="${OUTPUT_FILE}_$i" bs=1G count=1 oflag=direct status=none &
   done
   wait
