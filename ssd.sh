@@ -23,7 +23,8 @@ start_time=$(date +%s)
 
 while [ $(($(date +%s) - $start_time)) -lt 59 ]; do
     for i in {1..5}; do
-        dd if=/dev/urandom of="${OUTPUT_FILE}_$i" bs=1M count=1024 oflag=direct status=none &
+        dd if=/dev/zero of="${OUTPUT_FILE}_$i" bs=1M count=1024 oflag=direct status=none &&
+        rm -f "${OUTPUT_FILE}_$i" &
     done
     wait
 done
