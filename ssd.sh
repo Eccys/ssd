@@ -40,11 +40,6 @@ if [[ "$1" == "-cron" ]]; then
     exit 0
 fi
 
-# Delete old files if running with -auto
-if [[ "$1" == "-auto" ]]; then
-    find "$OUTPUT_DIR" -name "${OUTPUT_PREFIX}_*" -type f -delete
-fi
-
 # Track total bytes written
 total_bytes=0
 
@@ -72,5 +67,16 @@ done
 
 # Report total data written
 echo "Wrote $((total_bytes / 1048576)) MB to $OUTPUT_DIR"
+
+# Delete files if running with -auto
+if [[ "$1" == "-auto" ]]; then
+    echo "Running in -auto mode, deleting created files."
+    find "$OUTPUT_DIR" -name "${OUTPUT_PREFIX}_*" -type f -delete
+    if [[ $? -eq 0 ]]; then
+        echo "Successfully deleted files."
+    else
+        echo "Failed to delete files."
+    fi
+fi
 
 exit 0
