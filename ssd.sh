@@ -3,7 +3,8 @@
 OUTPUT_DIR="/opt/tmp"
 OUTPUT_PREFIX="tbw"
 COUNT=102400  # 100MB per file (102400 * 1024 bytes)
-NUM_FILES=5   # Total 500MB per minute
+MAX_PARALLEL=5  # Number of parallel dd commands
+DURATION=60  # Run for 60 seconds
 
 # Ensure output directory exists and is writable
 if [[ ! -d "$OUTPUT_DIR" ]]; then
@@ -44,19 +45,32 @@ if [[ "$1" == "-auto" ]]; then
     find "$OUTPUT_DIR" -name "${OUTPUT_PREFIX}_*" -type f -delete
 fi
 
-# Write files to exhaust TBW
-for i in $(seq 1 "$NUM_FILES"); do
-    output_file="${OUTPUT_DIR}/${OUTPUT_PREFIX}_${i}_$(date +%s)"
-    dd if=/dev/zero of="$output_file" bs=1024 count="$COUNT" status=none 2>/tmp/dd_error.log &
-    if [[ $? -ne 0 ]]; then
-        echo "Error in dd command for file $output_file. Check /tmp/dd_error.log"
-        exit 1
-    fi
+# Track total bytes written
+total_bytes=0
+
+# Run for 60 seconds
+start_time=$(date +%s)
+end_time=$((start_time + DURATION))
+
+while [ $(date +%s) -lt $end_time ]; do
+    # Start up to MAX_PARALLEL dd commands
+    for i in $(seq 1 "$MAX_PARALLEL"); do
+        output_file="${OUTPUT_DIR}/${OUTPUT_PREFIX}_${i}_$(date +%s)_$RANDOM"
+        dd if=/dev/zero of="$output_file" bs=1024 count="$COUNT" status=none 2>/tmp/dd_error.log &
+        pids[$i]=$!
+        ((total_bytes += COUNT * 1024))  # Track bytes written
+    done
+
+    # Wait for this batch of dd commands to complete
+    for i in $(seq 1 "$MAX_PARALLEL"); do
+        if ! wait "${pids[$i]}"; then
+            echo "Error in dd command for file $output_file. Check /tmp/dd_error.log"
+            exit 1
+        fi
+    done
 done
 
-# Wait for all dd commands to complete
-wait
-
-echo "Wrote $((NUM_FILES * COUNT / 1024)) MB to $OUTPUT_DIR"
+# Report total data written
+echo "Wrote $((total_bytes / 1048576)) MB to $OUTPUT_DIR"
 
 exit 0
