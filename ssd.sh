@@ -51,7 +51,7 @@ while [ $(date +%s) -lt $end_time ]; do
     # Start up to MAX_PARALLEL dd commands
     for i in $(seq 1 "$MAX_PARALLEL"); do
         output_file="${OUTPUT_DIR}/${OUTPUT_PREFIX}_${i}_$(date +%s)_$RANDOM"
-        dd if=/dev/zero of="$output_file" bs=1024 count="$COUNT" status=none 2>/tmp/dd_error.log &
+        dd if=/dev/urandom of="$output_file" bs=1024 count="$COUNT" oflag=direct status=none 2>/tmp/dd_error.log &
         pids[$i]=$!
         ((total_bytes += COUNT * 1024))  # Track bytes written
     done
