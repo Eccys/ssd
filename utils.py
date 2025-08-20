@@ -21,3 +21,15 @@ def get_wear_level():
         'power_on_hours': random.randint(100, 10000),
         'temperature': f"{random.randint(30, 60)}°C"
     }
+
+def run_performance_benchmark():
+    """Simulates a simple read/write performance benchmark."""
+    # This is a simulation. A real test would write/read a large file.
+    print("\nRunning benchmark... (simulation)")
+    read_speed = random.uniform(450.0, 550.0)
+    write_speed = random.uniform(400.0, 500.0)
+    
+    return {
+        'sequential_read': f"{read_speed:.2f} MB/s",
+        'sequential_write': f"{write_speed:.2f} MB/s"
+    }
