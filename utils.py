@@ -13,11 +13,12 @@ def get_disk_usage(path='/'):
     """Returns disk usage statistics as a dictionary."""
     if not os.path.exists(path):
         raise FileNotFoundError(f"Disk path does not exist: {path}")
+    target = os.path.dirname(os.path.abspath(path)) if os.path.isfile(path) else path
     if psutil is not None:
-        usage = psutil.disk_usage(path)
+        usage = psutil.disk_usage(target)
         percent = usage.percent
     else:
-        usage = shutil.disk_usage(path)
+        usage = shutil.disk_usage(target)
         percent = round((usage.used / usage.total) * 100, 1) if usage.total else 0.0
     return {
         'total': f"{usage.total / (1024**3):.2f} GB",
