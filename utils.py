@@ -1,16 +1,31 @@
 # utils.py
-import psutil
+import os
 import random
+import shutil
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 
 def get_disk_usage(path='/'):
     """Returns disk usage statistics as a dictionary."""
-    usage = psutil.disk_usage(path)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Disk path does not exist: {path}")
+    if psutil is not None:
+        usage = psutil.disk_usage(path)
+        percent = usage.percent
+    else:
+        usage = shutil.disk_usage(path)
+        percent = round((usage.used / usage.total) * 100, 1) if usage.total else 0.0
     return {
         'total': f"{usage.total / (1024**3):.2f} GB",
         'used': f"{usage.used / (1024**3):.2f} GB",
         'free': f"{usage.free / (1024**3):.2f} GB",
-        'percent': f"{usage.percent}%"
+        'percent': f"{percent}%"
     }
+
 
 def get_wear_level():
     """Returns a simulated wear level for the SSD."""
@@ -22,14 +37,16 @@ def get_wear_level():
         'temperature': f"{random.randint(30, 60)}°C"
     }
 
+
 def run_performance_benchmark():
     """Simulates a simple read/write performance benchmark."""
     # This is a simulation. A real test would write/read a large file.
     print("\nRunning benchmark... (simulation)")
     read_speed = random.uniform(450.0, 550.0)
     write_speed = random.uniform(400.0, 500.0)
-    
+
     return {
         'sequential_read': f"{read_speed:.2f} MB/s",
         'sequential_write': f"{write_speed:.2f} MB/s"
     }
+
