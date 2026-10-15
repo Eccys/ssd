@@ -11,9 +11,10 @@ except ImportError:
 
 def get_disk_usage(path='/'):
     """Returns disk usage statistics as a dictionary."""
-    if not os.path.exists(path):
+    if not path or not isinstance(path, (str, os.PathLike)) or not os.path.exists(path):
         raise FileNotFoundError(f"Disk path does not exist: {path}")
-    target = os.path.dirname(os.path.abspath(path)) if os.path.isfile(path) else path
+    abs_path = os.path.abspath(path)
+    target = os.path.dirname(abs_path) if os.path.isfile(abs_path) else abs_path
     if psutil is not None:
         usage = psutil.disk_usage(target)
         percent = usage.percent
