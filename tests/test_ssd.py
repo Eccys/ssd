@@ -1,13 +1,19 @@
+from collections import namedtuple
 import contextlib
 import io
+from pathlib import Path
+import sys
+
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import ssd_monitor
 import utils
 
 
 def test_get_disk_usage_and_missing_path(tmp_path, monkeypatch):
-    usage = utils.get_disk_usage(str(tmp_path))
+    usage = utils.get_disk_usage(tmp_path)
     assert set(usage.keys()) == {"total", "used", "free", "percent"}
     assert usage["total"].endswith(" GB")
     assert usage["percent"].endswith("%")
@@ -22,8 +28,15 @@ def test_get_disk_usage_and_missing_path(tmp_path, monkeypatch):
     assert set(fallback_usage.keys()) == {"total", "used", "free", "percent"}
     assert fallback_usage["percent"].endswith("%")
 
-    with pytest.raises(FileNotFoundError, match="does not exist"):
-        utils.get_disk_usage(str(tmp_path / "nonexistent_mount"))
+    # Zero-total disk capacity guard in shutil fallback
+    DiskUsage = namedtuple("DiskUsage", ["total", "used", "free"])
+    monkeypatch.setattr(utils.shutil, "disk_usage", lambda _p: DiskUsage(0, 0, 0))
+    zero_usage = utils.get_disk_usage(str(tmp_path))
+    assert zero_usage["percent"] == "0.0%"
+
+    for invalid in (str(tmp_path / "nonexistent_mount"), "", None):
+        with pytest.raises(FileNotFoundError, match="does not exist"):
+            utils.get_disk_usage(invalid)
 
 
 def test_wear_level_and_benchmark():
@@ -62,4 +75,5 @@ def test_cli_no_args_prints_help_notice():
     with contextlib.redirect_stdout(buf):
         ssd_monitor.main([])
     assert "No action specified" in buf.getvalue()
+
 
