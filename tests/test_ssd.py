@@ -34,7 +34,7 @@ def test_get_disk_usage_and_missing_path(tmp_path, monkeypatch):
     zero_usage = utils.get_disk_usage(str(tmp_path))
     assert zero_usage["percent"] == "0.0%"
 
-    for invalid in (str(tmp_path / "nonexistent_mount"), "", None):
+    for invalid in (str(tmp_path / "nonexistent_mount"), "", "   ", None):
         with pytest.raises(FileNotFoundError, match="does not exist"):
             utils.get_disk_usage(invalid)
 
@@ -59,6 +59,12 @@ def test_cli_runs_both_health_and_benchmark_together(tmp_path):
     assert "--- SSD Performance Benchmark ---" in out
     assert "Report finished." in out
     assert "Benchmark finished." in out
+
+    bench_only = io.StringIO()
+    with contextlib.redirect_stdout(bench_only):
+        ssd_monitor.main(["--run-benchmark"])
+    assert "--- SSD Health Report ---" not in bench_only.getvalue()
+    assert "--- SSD Performance Benchmark ---" in bench_only.getvalue()
 
 
 def test_cli_invalid_path_exits_with_code_1(tmp_path):

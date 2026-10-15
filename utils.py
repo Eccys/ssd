@@ -11,9 +11,12 @@ except ImportError:
 
 def get_disk_usage(path='/'):
     """Returns disk usage statistics as a dictionary."""
-    if not path or not isinstance(path, (str, os.PathLike)) or not os.path.exists(path):
+    if not isinstance(path, (str, os.PathLike)):
         raise FileNotFoundError(f"Disk path does not exist: {path}")
-    abs_path = os.path.abspath(path)
+    raw_path = os.fspath(path)
+    if not isinstance(raw_path, str) or not raw_path.strip() or not os.path.exists(raw_path):
+        raise FileNotFoundError(f"Disk path does not exist: {path}")
+    abs_path = os.path.abspath(raw_path)
     target = os.path.dirname(abs_path) if os.path.isfile(abs_path) else abs_path
     if psutil is not None:
         usage = psutil.disk_usage(target)
